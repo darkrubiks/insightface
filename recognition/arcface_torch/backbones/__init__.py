@@ -3,6 +3,12 @@ from .mobilefacenet import get_mbf
 
 
 def get_model(name, **kwargs):
+    # NCNN
+    if name == "ncnn":
+        from .NCNN import NCNN
+        num_features = kwargs.get("num_features", 512)
+        return NCNN(num_classes=num_features)
+
     # resnet
     if name == "r18":
         return iresnet18(False, **kwargs)
