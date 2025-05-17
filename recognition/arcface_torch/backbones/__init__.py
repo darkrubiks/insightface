@@ -8,6 +8,12 @@ def get_model(name, **kwargs):
         from .NCNN import NCNN
         num_features = kwargs.get("num_features", 512)
         return NCNN(num_classes=num_features)
+    
+    if name == "vgg16":
+        from .VGG16 import VGG16
+        num_features = kwargs.get("num_features", 512)
+        dropout = kwargs.get("dropout", 0.5)
+        return VGG16(num_classes=num_features, dropout=dropout)
 
     # resnet
     if name == "r18":
