@@ -52,7 +52,7 @@ class NCNN(nn.Module):
             nn.Flatten()                    # -> [batch, 5*5*64]
         )
 
-        self.classifier = nn.Sequential(
+        self.embeddings = nn.Sequential(
             nn.Linear(5 * 5 * 64, num_classes, bias=False),
             nn.BatchNorm1d(num_classes)
         )
@@ -71,7 +71,7 @@ class NCNN(nn.Module):
         feats = self.merge_branch(x_cat)
 
         # final logit
-        logits = self.classifier(feats)
+        logits = self.embeddings(feats)
         return logits
 
 

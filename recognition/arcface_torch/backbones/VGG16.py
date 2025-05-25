@@ -7,13 +7,13 @@ class VGG16(nn.Module):
         super(VGG16, self).__init__()
         self.vgg = vgg16_bn(dropout=dropout)
         self.vgg.classifier = nn.Identity()
-        self.classifier = nn.Sequential(
+        self.embeddings = nn.Sequential(
             nn.Linear(512 * 7 * 7, num_classes, bias=False),
             nn.BatchNorm1d(num_classes)
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         feats = self.vgg(x)
-        logits = self.classifier(feats)
+        logits = self.embeddings(feats)
 
         return logits
