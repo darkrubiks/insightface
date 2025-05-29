@@ -14,6 +14,12 @@ def get_model(name, **kwargs):
         num_features = kwargs.get("num_features", 512)
         dropout = kwargs.get("dropout", 0.5)
         return VGG16(num_classes=num_features, dropout=dropout)
+    
+    if name == "vit_b_16":
+        from .vit_b_16 import ViT
+        num_features = kwargs.get("num_features", 512)
+        dropout = kwargs.get("dropout", 0.0)
+        return ViT(num_classes=num_features, dropout=dropout)
 
     # resnet
     if name == "r18":

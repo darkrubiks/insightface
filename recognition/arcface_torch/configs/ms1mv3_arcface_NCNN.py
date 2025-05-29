@@ -17,7 +17,8 @@ config.embedding_size = 512
 
 # Partial FC
 config.sample_rate = 1.0
-config.fp16 = False
+# Use fp16 for training
+config.fp16 = True 
 
 # For SGD 
 config.optimizer = "sgd"
@@ -25,7 +26,7 @@ config.lr = 0.1
 config.momentum = 0.9
 config.weight_decay = 5e-4
 
-config.batch_size = 128
+config.batch_size = 256
 
 config.verbose = 2000
 config.dali = False
