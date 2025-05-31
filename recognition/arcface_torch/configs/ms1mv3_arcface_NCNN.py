@@ -26,7 +26,7 @@ config.lr = 0.1
 config.momentum = 0.9
 config.weight_decay = 5e-4
 
-config.batch_size = 256
+config.batch_size = 128
 
 config.verbose = 2000
 config.dali = False
