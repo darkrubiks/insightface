@@ -18,7 +18,7 @@ config.embedding_size = 512
 # Partial FC
 config.sample_rate = 1.0
 # Use fp16 for training
-config.fp16 = True 
+config.fp16 = False 
 
 # For SGD 
 config.optimizer = "sgd"
