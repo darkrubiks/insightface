@@ -9,7 +9,7 @@ config = edict()
 # Margin Base Softmax
 config.margin_list = (1.0, 0.0, 0.4)
 config.network = "vgg16"
-config.resume = True
+config.resume = False
 config.save_all_states = True
 config.output = "ms1mv3_arcface_VGG16"
 
