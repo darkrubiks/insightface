@@ -24,6 +24,7 @@ def get_dataloader(
     dali_aug = False,
     seed = 2048,
     num_workers = 2,
+    image_size=112,
     ) -> Iterable:
 
     rec = os.path.join(root_dir, 'train.rec')
@@ -32,16 +33,17 @@ def get_dataloader(
 
     # Synthetic
     if root_dir == "synthetic":
-        train_set = SyntheticDataset()
+        train_set = SyntheticDataset(image_size=image_size)
         dali = False
 
     # Mxnet RecordIO
     elif os.path.exists(rec) and os.path.exists(idx):
-        train_set = MXFaceDataset(root_dir=root_dir, local_rank=local_rank)
+        train_set = MXFaceDataset(root_dir=root_dir, local_rank=local_rank, image_size=image_size)
 
     # Image Folder
     else:
         transform = transforms.Compose([
+             transforms.Resize((image_size, image_size)),
              transforms.RandomHorizontalFlip(),
              transforms.ToTensor(),
              transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
@@ -52,7 +54,8 @@ def get_dataloader(
     if dali:
         return dali_data_iter(
             batch_size=batch_size, rec_file=rec, idx_file=idx,
-            num_threads=2, local_rank=local_rank, dali_aug=dali_aug)
+            num_threads=2, local_rank=local_rank, dali_aug=dali_aug,
+            image_size=image_size)
 
     rank, world_size = get_dist_info()
     train_sampler = DistributedSampler(
@@ -135,11 +138,11 @@ class DataLoaderX(DataLoader):
 
 
 class MXFaceDataset(Dataset):
-    def __init__(self, root_dir, local_rank):
+    def __init__(self, root_dir, local_rank, image_size=112):
         super(MXFaceDataset, self).__init__()
         self.transform = transforms.Compose(
             [transforms.ToPILImage(),
-             transforms.Resize((224, 224)), # mudei aqui
+             transforms.Resize((image_size, image_size)),
              transforms.RandomHorizontalFlip(),
              transforms.ToTensor(),
              transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
@@ -175,9 +178,9 @@ class MXFaceDataset(Dataset):
 
 
 class SyntheticDataset(Dataset):
-    def __init__(self):
+    def __init__(self, image_size=112):
         super(SyntheticDataset, self).__init__()
-        img = np.random.randint(0, 255, size=(112, 112, 3), dtype=np.int32)
+        img = np.random.randint(0, 255, size=(image_size, image_size, 3), dtype=np.int32)
         img = np.transpose(img, (2, 0, 1))
         img = torch.from_numpy(img).squeeze(0).float()
         img = ((img / 255) - 0.5) / 0.5
@@ -195,9 +198,10 @@ def dali_data_iter(
     batch_size: int, rec_file: str, idx_file: str, num_threads: int,
     initial_fill=32768, random_shuffle=True,
     prefetch_queue_depth=1, local_rank=0, name="reader",
-    mean=(127.5, 127.5, 127.5), 
+    mean=(127.5, 127.5, 127.5),
     std=(127.5, 127.5, 127.5),
-    dali_aug=False
+    dali_aug=False,
+    image_size=112
     ):
     """
     Parameters:
@@ -213,7 +217,7 @@ def dali_data_iter(
     from nvidia.dali.pipeline import Pipeline
     from nvidia.dali.plugin.pytorch import DALIClassificationIterator
 
-    def dali_random_resize(img, resize_size, image_size=112):
+    def dali_random_resize(img, resize_size, image_size=image_size):
         img = fn.resize(img, resize_x=resize_size, resize_y=resize_size)
         img = fn.resize(img, size=(image_size, image_size))
         return img
@@ -233,7 +237,7 @@ def dali_data_iter(
         return condition * true_case + neg_condition * false_case
 
     condition_resize = fn.random.coin_flip(probability=0.1)
-    size_resize = fn.random.uniform(range=(int(112 * 0.5), int(112 * 0.8)), dtype=types.FLOAT)
+    size_resize = fn.random.uniform(range=(int(image_size * 0.5), int(image_size * 0.8)), dtype=types.FLOAT)
     condition_blur = fn.random.coin_flip(probability=0.2)
     window_size_blur = fn.random.uniform(range=(1, 2), dtype=types.INT32)
     condition_flip = fn.random.coin_flip(probability=0.5)
@@ -253,7 +257,7 @@ def dali_data_iter(
         images = fn.decoders.image(jpegs, device="mixed", output_type=types.RGB)
         if dali_aug:
             images = fn.cast(images, dtype=types.UINT8)
-            images = multiplexing(condition_resize, dali_random_resize(images, size_resize, image_size=112), images)
+            images = multiplexing(condition_resize, dali_random_resize(images, size_resize, image_size=image_size), images)
             images = multiplexing(condition_blur, dali_random_gaussian_blur(images, window_size_blur), images)
             images = multiplexing(condition_hsv, dali_random_hsv(images, hsv_hue, hsv_saturation), images)
             images = dali_random_gray(images, 0.1)

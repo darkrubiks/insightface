@@ -49,6 +49,9 @@ config.seed = 2048
 # dataload numworkers
 config.num_workers = 2
 
+# input image resolution
+config.image_size = 112
+
 # WandB Logger
 config.wandb_key = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 config.suffix_run_name = None

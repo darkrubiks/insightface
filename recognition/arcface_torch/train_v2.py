@@ -89,7 +89,8 @@ def main(args):
         cfg.dali,
         cfg.dali_aug,
         cfg.seed,
-        cfg.num_workers
+        cfg.num_workers,
+        cfg.image_size
     )
 
     backbone = get_model(
@@ -159,8 +160,10 @@ def main(args):
         logging.info(": " + key + " " * num_space + str(value))
 
     callback_verification = CallBackVerification(
-        val_targets=cfg.val_targets, rec_prefix=cfg.rec, 
-        summary_writer=summary_writer, wandb_logger = wandb_logger
+        val_targets=cfg.val_targets, rec_prefix=cfg.rec,
+        summary_writer=summary_writer,
+        image_size=(cfg.image_size, cfg.image_size),
+        wandb_logger = wandb_logger
     )
     callback_logging = CallBackLogging(
         frequent=cfg.frequent,
