@@ -34,6 +34,8 @@ config.dali = False
 # dataload numworkers
 config.num_workers = 12
 
+config.image_size = 120
+
 config.rec = "./train/ms1m-retinaface-t1"
 config.num_classes = 93431
 config.num_image = 5179510
