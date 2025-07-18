@@ -7,7 +7,7 @@ from easydict import EasyDict as edict
 config = edict()
 
 # Margin Base Softmax
-config.margin_list = (1.0, 0.5, 0.0)
+config.margin_list = (1.0, 0.0, 0.4)
 config.network = "vit_b_16"
 config.resume = False
 config.save_all_states = True
@@ -40,6 +40,6 @@ config.image_size = 120
 config.rec = "./train/ms1m-retinaface-t1"
 config.num_classes = 93431
 config.num_image = 5179510
-config.num_epoch = 40
+config.num_epoch = 50
 config.warmup_epoch = config.num_epoch // 10
 config.val_targets = ['lfw', 'cfp_fp', "agedb_30"]
